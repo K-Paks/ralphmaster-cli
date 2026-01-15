@@ -44,6 +44,14 @@ var taskAddCmd = &cobra.Command{
 			fmt.Fprintln(os.Stderr, "Error: --goal is required")
 			os.Exit(1)
 		}
+		if taskAddComments == "" {
+			fmt.Fprintln(os.Stderr, "Error: --comments is required")
+			os.Exit(1)
+		}
+		if taskAddReferences == "" {
+			fmt.Fprintln(os.Stderr, "Error: --references is required")
+			os.Exit(1)
+		}
 
 		comments, err := getComments(taskAddIssue)
 		if err != nil {
@@ -53,14 +61,8 @@ var taskAddCmd = &cobra.Command{
 
 		nextNumber := findNextTaskNumber(comments)
 
-		taskBody := fmt.Sprintf("[UNDONE]\nid: %d\nmodel: %s\ngoal: %s",
-			nextNumber, taskAddModel, taskAddGoal)
-		if taskAddComments != "" {
-			taskBody += fmt.Sprintf("\ncomments: %s", taskAddComments)
-		}
-		if taskAddReferences != "" {
-			taskBody += fmt.Sprintf("\nreferences: %s", taskAddReferences)
-		}
+		taskBody := fmt.Sprintf("[UNDONE]\nid: %d\nmodel: %s\ngoal: %s\ncomments: %s\nreferences: %s",
+			nextNumber, taskAddModel, taskAddGoal, taskAddComments, taskAddReferences)
 
 		if err := addComment(taskAddIssue, taskBody); err != nil {
 			fmt.Fprintf(os.Stderr, "Error adding task comment: %v\n", err)
@@ -97,7 +99,7 @@ func init() {
 	taskAddCmd.Flags().IntVar(&taskAddIssue, "issue", 0, "Issue number (required)")
 	taskAddCmd.Flags().StringVar(&taskAddModel, "model", "", "Model: opus|sonnet|haiku (required)")
 	taskAddCmd.Flags().StringVar(&taskAddGoal, "goal", "", "Task goal description (required)")
-	taskAddCmd.Flags().StringVar(&taskAddComments, "comments", "", "Additional comments")
-	taskAddCmd.Flags().StringVar(&taskAddReferences, "references", "", "File references (e.g., path/to/file.ts#10-17)")
+	taskAddCmd.Flags().StringVar(&taskAddComments, "comments", "", "Additional comments (required)")
+	taskAddCmd.Flags().StringVar(&taskAddReferences, "references", "", "File references, e.g., path/to/file.ts#10-17 (required)")
 	taskCmd.AddCommand(taskAddCmd)
 }
