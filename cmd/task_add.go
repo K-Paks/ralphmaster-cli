@@ -53,8 +53,14 @@ var taskAddCmd = &cobra.Command{
 
 		nextNumber := findNextTaskNumber(comments)
 
-		taskBody := fmt.Sprintf("[UNDONE]\n%d,%s,%s,%s,%s",
-			nextNumber, taskAddModel, taskAddGoal, taskAddComments, taskAddReferences)
+		taskBody := fmt.Sprintf("[UNDONE]\nid: %d\nmodel: %s\ngoal: %s",
+			nextNumber, taskAddModel, taskAddGoal)
+		if taskAddComments != "" {
+			taskBody += fmt.Sprintf("\ncomments: %s", taskAddComments)
+		}
+		if taskAddReferences != "" {
+			taskBody += fmt.Sprintf("\nreferences: %s", taskAddReferences)
+		}
 
 		if err := addComment(taskAddIssue, taskBody); err != nil {
 			fmt.Fprintf(os.Stderr, "Error adding task comment: %v\n", err)
@@ -66,12 +72,15 @@ var taskAddCmd = &cobra.Command{
 
 func findNextTaskNumber(comments []Comment) int {
 	maxNumber := 0
-	taskPattern := regexp.MustCompile(`^\[(UNDONE|DONE)\]\n(\d+),`)
+	idPattern := regexp.MustCompile(`(?m)^id: (\d+)`)
 
 	for _, c := range comments {
-		matches := taskPattern.FindStringSubmatch(c.Body)
-		if len(matches) >= 3 {
-			num, err := strconv.Atoi(matches[2])
+		if !isTaskComment(c.Body) {
+			continue
+		}
+		matches := idPattern.FindStringSubmatch(c.Body)
+		if len(matches) >= 2 {
+			num, err := strconv.Atoi(matches[1])
 			if err == nil && num > maxNumber {
 				maxNumber = num
 			}

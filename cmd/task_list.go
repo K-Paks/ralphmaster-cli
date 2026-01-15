@@ -26,7 +26,9 @@ var taskListCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		taskPattern := regexp.MustCompile(`^\[UNDONE\]\n(\d+),(\w+),([^,]*),([^,]*),(.*)$`)
+		idPattern := regexp.MustCompile(`(?m)^id: (\d+)`)
+		modelPattern := regexp.MustCompile(`(?m)^model: (\w+)`)
+		goalPattern := regexp.MustCompile(`(?m)^goal: (.+)`)
 		foundTasks := false
 
 		for _, c := range comments {
@@ -34,13 +36,13 @@ var taskListCmd = &cobra.Command{
 				continue
 			}
 
-			matches := taskPattern.FindStringSubmatch(c.Body)
-			if len(matches) >= 4 {
+			idMatch := idPattern.FindStringSubmatch(c.Body)
+			modelMatch := modelPattern.FindStringSubmatch(c.Body)
+			goalMatch := goalPattern.FindStringSubmatch(c.Body)
+
+			if len(idMatch) >= 2 && len(modelMatch) >= 2 && len(goalMatch) >= 2 {
 				foundTasks = true
-				number := matches[1]
-				model := matches[2]
-				goal := matches[3]
-				fmt.Printf("#%s [%s] %s\n", number, model, goal)
+				fmt.Printf("#%s [%s] %s\n", idMatch[1], modelMatch[1], goalMatch[1])
 			}
 		}
 

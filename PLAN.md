@@ -76,7 +76,11 @@ Add a task comment to an issue. Task number is auto-incremented based on existin
 **Comment format:**
 ```
 [UNDONE]
-<number>,<model>,<goal>,<comments>,<references>
+id: <number>
+model: <model>
+goal: <goal>
+comments: <comments>
+references: <references>
 ```
 
 **Files to create:** `cmd/task.go`, `cmd/task_add.go`
@@ -117,11 +121,14 @@ Mark a task as completed.
 **Updated comment format:**
 ```
 [DONE]
-<number>,<model>,<goal>,<comments>,<references>
-----------------
-WORK DONE:
-<work-done summary>
-COMMIT: <commit>
+id: <number>
+model: <model>
+goal: <goal>
+comments: <comments>
+references: <references>
+
+work_done: <work-done summary>
+commit: <commit>
 ```
 
 **Files to create:** `cmd/task_done.go`

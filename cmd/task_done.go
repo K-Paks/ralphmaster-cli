@@ -44,11 +44,11 @@ var taskDoneCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		taskPattern := regexp.MustCompile(fmt.Sprintf(`^\[UNDONE\]\n%d,(.*)$`, taskDoneTask))
+		idPattern := regexp.MustCompile(fmt.Sprintf(`(?m)^id: %d$`, taskDoneTask))
 
 		var targetComment *Comment
 		for i, c := range comments {
-			if taskPattern.MatchString(c.Body) {
+			if strings.HasPrefix(c.Body, "[UNDONE]") && idPattern.MatchString(c.Body) {
 				targetComment = &comments[i]
 				break
 			}
@@ -60,7 +60,7 @@ var taskDoneCmd = &cobra.Command{
 		}
 
 		newBody := strings.Replace(targetComment.Body, "[UNDONE]", "[DONE]", 1)
-		newBody += fmt.Sprintf("\n----------------\nWORK DONE:\n%s\nCOMMIT: %s", taskDoneWorkDone, taskDoneCommit)
+		newBody += fmt.Sprintf("\n\nwork_done: %s\ncommit: %s", taskDoneWorkDone, taskDoneCommit)
 
 		if err := editComment(targetComment.ID, newBody); err != nil {
 			fmt.Fprintf(os.Stderr, "Error updating task comment: %v\n", err)
@@ -78,7 +78,6 @@ func editComment(commentID int, body string) error {
 
 	ghArgs := []string{"api", endpoint, "-X", "PATCH", "-f", fmt.Sprintf("body=%s", body)}
 	cmd := exec.Command("gh", ghArgs...)
-	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }

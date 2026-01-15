@@ -43,6 +43,18 @@ ralphmaster task list --issue 1
 ralphmaster task done --issue 1 --task 1 --commit "abc123" --work-done "Created REST endpoint with validation"
 ```
 
+### Start Issue
+```bash
+ralphmaster start --issue 1
+```
+Adds `[IN PROGRESS]` to the first line of the issue description.
+
+### Complete Issue
+```bash
+ralphmaster done --issue 1
+```
+Adds `[DONE]` to the first line of the issue description and closes the issue.
+
 ## Global Flags
 
 All commands support `--repo owner/name` to override auto-detection from git remote.
@@ -59,15 +71,22 @@ overview: Single line description
 **Task (undone):**
 ```
 [UNDONE]
-1,sonnet,Create API endpoint,comments,references
+id: 1
+model: sonnet
+goal: Create API endpoint
+comments: Additional context here
+references: src/api/main.go#10-20
 ```
 
 **Task (done):**
 ```
 [DONE]
-1,sonnet,Create API endpoint,comments,references
-----------------
-WORK DONE:
-Summary of completed work
-COMMIT: abc123
+id: 1
+model: sonnet
+goal: Create API endpoint
+comments: Additional context here
+references: src/api/main.go#10-20
+
+work_done: Summary of completed work
+commit: abc123
 ```
