@@ -16,6 +16,8 @@ var (
 	taskAddGoal       string
 	taskAddComments   string
 	taskAddReferences string
+	taskAddUnitTests  string
+	taskAddE2ETests   string
 )
 
 var validModels = map[string]bool{
@@ -64,6 +66,13 @@ var taskAddCmd = &cobra.Command{
 		taskBody := fmt.Sprintf("[UNDONE]\nid: %d\nmodel: %s\ngoal: %s\ncomments: %s\nreferences: %s",
 			nextNumber, taskAddModel, taskAddGoal, taskAddComments, taskAddReferences)
 
+		if taskAddUnitTests != "" {
+			taskBody += fmt.Sprintf("\nunit-tests: %s", taskAddUnitTests)
+		}
+		if taskAddE2ETests != "" {
+			taskBody += fmt.Sprintf("\ne2e-tests: %s", taskAddE2ETests)
+		}
+
 		if err := addComment(taskAddIssue, taskBody); err != nil {
 			fmt.Fprintf(os.Stderr, "Error adding task comment: %v\n", err)
 			os.Exit(1)
@@ -101,5 +110,7 @@ func init() {
 	taskAddCmd.Flags().StringVar(&taskAddGoal, "goal", "", "Task goal description (required)")
 	taskAddCmd.Flags().StringVar(&taskAddComments, "comments", "", "Additional comments (required)")
 	taskAddCmd.Flags().StringVar(&taskAddReferences, "references", "", "File references, e.g., path/to/file.ts#10-17 (required)")
+	taskAddCmd.Flags().StringVar(&taskAddUnitTests, "unit-tests", "", "Unit test instructions (optional)")
+	taskAddCmd.Flags().StringVar(&taskAddE2ETests, "e2e-tests", "", "E2E test instructions (optional)")
 	taskCmd.AddCommand(taskAddCmd)
 }
