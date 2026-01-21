@@ -28,9 +28,9 @@ var startCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		newBody := "[IN PROGRESS]\n" + issue.Body
+		newTitle := "[IN PROGRESS] " + stripStatusPrefix(issue.Title)
 
-		if err := b.UpdateIssueBody(ctx, startIssue, newBody); err != nil {
+		if err := b.UpdateIssueTitle(ctx, startIssue, newTitle); err != nil {
 			fmt.Fprintf(os.Stderr, "Error updating issue: %v\n", err)
 			os.Exit(1)
 		}

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -44,6 +45,17 @@ func Execute() {
 // GetBackend returns the initialized backend for use by subcommands.
 func GetBackend() backend.Backend {
 	return activeBackend
+}
+
+// stripStatusPrefix removes any status prefix ([UNDONE], [IN PROGRESS], [DONE]) from a title.
+func stripStatusPrefix(title string) string {
+	prefixes := []string{"[UNDONE] ", "[IN PROGRESS] ", "[DONE] "}
+	for _, p := range prefixes {
+		if strings.HasPrefix(title, p) {
+			return strings.TrimPrefix(title, p)
+		}
+	}
+	return title
 }
 
 func init() {

@@ -3,6 +3,7 @@ package backend
 // Issue represents an issue from any backend.
 type Issue struct {
 	Number int    `json:"number"`
+	Title  string `json:"title"`
 	Body   string `json:"body"`
 }
 

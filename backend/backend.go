@@ -8,6 +8,7 @@ type Backend interface {
 	// Issue operations
 	CreateIssue(ctx context.Context, title, description string) error
 	GetIssue(ctx context.Context, issueNumber int) (*Issue, error)
+	UpdateIssueTitle(ctx context.Context, issueNumber int, title string) error
 	UpdateIssueBody(ctx context.Context, issueNumber int, body string) error
 	CloseIssue(ctx context.Context, issueNumber int) error
 

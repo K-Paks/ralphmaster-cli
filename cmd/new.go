@@ -27,7 +27,7 @@ var newCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		if err := GetBackend().CreateIssue(ctx, newTitle, newDescription); err != nil {
+		if err := GetBackend().CreateIssue(ctx, "[UNDONE] "+newTitle, newDescription); err != nil {
 			fmt.Fprintf(os.Stderr, "Error creating issue: %v\n", err)
 			os.Exit(1)
 		}

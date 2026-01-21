@@ -38,6 +38,16 @@ func (g *GitHubBackend) GetIssue(ctx context.Context, issueNumber int) (*backend
 	return &issue, nil
 }
 
+// UpdateIssueTitle updates the title of an issue.
+func (g *GitHubBackend) UpdateIssueTitle(ctx context.Context, issueNumber int, title string) error {
+	ghArgs := []string{"issue", "edit", fmt.Sprintf("%d", issueNumber), "--title", title}
+	ghArgs = append(ghArgs, g.repoArgs()...)
+
+	cmd := exec.CommandContext(ctx, "gh", ghArgs...)
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
 // UpdateIssueBody updates the body of an issue.
 func (g *GitHubBackend) UpdateIssueBody(ctx context.Context, issueNumber int, body string) error {
 	ghArgs := []string{"issue", "edit", fmt.Sprintf("%d", issueNumber), "--body", body}

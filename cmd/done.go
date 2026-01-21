@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -29,13 +28,9 @@ var doneCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		newBody := issue.Body
-		if strings.HasPrefix(newBody, "[IN PROGRESS]\n") {
-			newBody = strings.TrimPrefix(newBody, "[IN PROGRESS]\n")
-		}
-		newBody = "[DONE]\n" + newBody
+		newTitle := "[DONE] " + stripStatusPrefix(issue.Title)
 
-		if err := b.UpdateIssueBody(ctx, doneIssue, newBody); err != nil {
+		if err := b.UpdateIssueTitle(ctx, doneIssue, newTitle); err != nil {
 			fmt.Fprintf(os.Stderr, "Error updating issue: %v\n", err)
 			os.Exit(1)
 		}
