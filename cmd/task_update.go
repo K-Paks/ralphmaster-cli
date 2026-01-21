@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
 	"strings"
 
 	"github.com/spf13/cobra"
+
+	"ralphmaster/backend"
 )
 
 var (
@@ -46,7 +49,10 @@ var taskUpdateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		comments, err := getComments(taskUpdateIssue)
+		ctx := context.Background()
+		b := GetBackend()
+
+		comments, err := b.GetComments(ctx, taskUpdateIssue)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error fetching comments: %v\n", err)
 			os.Exit(1)
@@ -54,7 +60,7 @@ var taskUpdateCmd = &cobra.Command{
 
 		idPattern := regexp.MustCompile(fmt.Sprintf(`(?m)^id: %d$`, taskUpdateTask))
 
-		var targetComment *Comment
+		var targetComment *backend.Comment
 		for i, c := range comments {
 			if strings.HasPrefix(c.Body, "[UNDONE]") && idPattern.MatchString(c.Body) {
 				targetComment = &comments[i]
@@ -89,7 +95,7 @@ var taskUpdateCmd = &cobra.Command{
 			newBody = updateField(newBody, "e2e-tests", taskUpdateE2ETests)
 		}
 
-		if err := editComment(targetComment.ID, newBody); err != nil {
+		if err := b.EditComment(ctx, targetComment.ID, newBody); err != nil {
 			fmt.Fprintf(os.Stderr, "Error updating task comment: %v\n", err)
 			os.Exit(1)
 		}
