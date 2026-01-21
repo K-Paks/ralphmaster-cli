@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
@@ -8,6 +9,8 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
+	"ralphmaster/backend"
 )
 
 var (
@@ -55,7 +58,10 @@ var taskAddCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		comments, err := getComments(taskAddIssue)
+		ctx := context.Background()
+		b := GetBackend()
+
+		comments, err := b.GetComments(ctx, taskAddIssue)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error fetching comments: %v\n", err)
 			os.Exit(1)
@@ -73,7 +79,7 @@ var taskAddCmd = &cobra.Command{
 			taskBody += fmt.Sprintf("\ne2e-tests: %s", taskAddE2ETests)
 		}
 
-		if err := addComment(taskAddIssue, taskBody); err != nil {
+		if err := b.AddComment(ctx, taskAddIssue, taskBody); err != nil {
 			fmt.Fprintf(os.Stderr, "Error adding task comment: %v\n", err)
 			os.Exit(1)
 		}
@@ -81,7 +87,7 @@ var taskAddCmd = &cobra.Command{
 	},
 }
 
-func findNextTaskNumber(comments []Comment) int {
+func findNextTaskNumber(comments []backend.Comment) int {
 	maxNumber := 0
 	idPattern := regexp.MustCompile(`(?m)^id: (\d+)`)
 

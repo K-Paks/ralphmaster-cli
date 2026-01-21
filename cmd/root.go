@@ -1,17 +1,37 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"ralphmaster/backend"
+	_ "ralphmaster/backend/github" // Register GitHub backend
 )
 
-var repo string
+var (
+	repo        string
+	backendType string
+	activeBackend backend.Backend
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "ralphmaster",
 	Short: "A CLI tool for LLM-GitHub interactions",
 	Long:  `ralphmaster is a CLI tool that helps LLMs use correct interfaces when communicating with GitHub.`,
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		cfg := backend.Config{
+			Type:       backendType,
+			Repository: repo,
+		}
+		b, err := backend.New(cfg)
+		if err != nil {
+			return fmt.Errorf("failed to initialize backend: %w", err)
+		}
+		activeBackend = b
+		return nil
+	},
 }
 
 func Execute() {
@@ -21,6 +41,12 @@ func Execute() {
 	}
 }
 
+// GetBackend returns the initialized backend for use by subcommands.
+func GetBackend() backend.Backend {
+	return activeBackend
+}
+
 func init() {
 	rootCmd.PersistentFlags().StringVar(&repo, "repo", "", "GitHub repository (owner/name). Auto-detected from git remote if not specified.")
+	rootCmd.PersistentFlags().StringVar(&backendType, "backend", "github", "Backend type: github")
 }

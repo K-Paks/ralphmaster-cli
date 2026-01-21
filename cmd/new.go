@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/spf13/cobra"
 )
@@ -26,16 +26,8 @@ var newCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		ghArgs := []string{"issue", "create", "--title", newTitle, "--body", newDescription}
-		if repo != "" {
-			ghArgs = append(ghArgs, "--repo", repo)
-		}
-
-		ghCmd := exec.Command("gh", ghArgs...)
-		ghCmd.Stdout = os.Stdout
-		ghCmd.Stderr = os.Stderr
-
-		if err := ghCmd.Run(); err != nil {
+		ctx := context.Background()
+		if err := GetBackend().CreateIssue(ctx, newTitle, newDescription); err != nil {
 			fmt.Fprintf(os.Stderr, "Error creating issue: %v\n", err)
 			os.Exit(1)
 		}

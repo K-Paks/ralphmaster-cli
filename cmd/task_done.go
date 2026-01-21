@@ -1,13 +1,15 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 
 	"github.com/spf13/cobra"
+
+	"ralphmaster/backend"
 )
 
 var (
@@ -38,7 +40,10 @@ var taskDoneCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		comments, err := getComments(taskDoneIssue)
+		ctx := context.Background()
+		b := GetBackend()
+
+		comments, err := b.GetComments(ctx, taskDoneIssue)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error fetching comments: %v\n", err)
 			os.Exit(1)
@@ -46,7 +51,7 @@ var taskDoneCmd = &cobra.Command{
 
 		idPattern := regexp.MustCompile(fmt.Sprintf(`(?m)^id: %d$`, taskDoneTask))
 
-		var targetComment *Comment
+		var targetComment *backend.Comment
 		for i, c := range comments {
 			if strings.HasPrefix(c.Body, "[UNDONE]") && idPattern.MatchString(c.Body) {
 				targetComment = &comments[i]
@@ -62,24 +67,12 @@ var taskDoneCmd = &cobra.Command{
 		newBody := strings.Replace(targetComment.Body, "[UNDONE]", "[DONE]", 1)
 		newBody += fmt.Sprintf("\n\nwork_done: %s\ncommit: %s", taskDoneWorkDone, taskDoneCommit)
 
-		if err := editComment(targetComment.ID, newBody); err != nil {
+		if err := b.EditComment(ctx, targetComment.ID, newBody); err != nil {
 			fmt.Fprintf(os.Stderr, "Error updating task comment: %v\n", err)
 			os.Exit(1)
 		}
 		fmt.Printf("Task #%d marked as done\n", taskDoneTask)
 	},
-}
-
-func editComment(commentID int, body string) error {
-	endpoint := fmt.Sprintf("repos/{owner}/{repo}/issues/comments/%d", commentID)
-	if repo != "" {
-		endpoint = fmt.Sprintf("repos/%s/issues/comments/%d", repo, commentID)
-	}
-
-	ghArgs := []string{"api", endpoint, "-X", "PATCH", "-f", fmt.Sprintf("body=%s", body)}
-	cmd := exec.Command("gh", ghArgs...)
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
 }
 
 func init() {

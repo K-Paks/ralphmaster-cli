@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -18,7 +19,10 @@ var startCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		issue, err := getIssue(startIssue)
+		ctx := context.Background()
+		b := GetBackend()
+
+		issue, err := b.GetIssue(ctx, startIssue)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error fetching issue: %v\n", err)
 			os.Exit(1)
@@ -26,7 +30,7 @@ var startCmd = &cobra.Command{
 
 		newBody := "[IN PROGRESS]\n" + issue.Body
 
-		if err := updateIssueBody(startIssue, newBody); err != nil {
+		if err := b.UpdateIssueBody(ctx, startIssue, newBody); err != nil {
 			fmt.Fprintf(os.Stderr, "Error updating issue: %v\n", err)
 			os.Exit(1)
 		}

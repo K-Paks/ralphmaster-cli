@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -32,7 +33,10 @@ var metadataAddCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		comments, err := getComments(metadataAddIssue)
+		ctx := context.Background()
+		b := GetBackend()
+
+		comments, err := b.GetComments(ctx, metadataAddIssue)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error fetching comments: %v\n", err)
 			os.Exit(1)
@@ -41,7 +45,7 @@ var metadataAddCmd = &cobra.Command{
 		metadataBody := fmt.Sprintf("[METADATA]\nbranch: %s\noverview: %s", metadataAddBranch, metadataAddOverview)
 
 		if len(comments) == 0 {
-			if err := addComment(metadataAddIssue, metadataBody); err != nil {
+			if err := b.AddComment(ctx, metadataAddIssue, metadataBody); err != nil {
 				fmt.Fprintf(os.Stderr, "Error adding metadata comment: %v\n", err)
 				os.Exit(1)
 			}
@@ -54,11 +58,11 @@ var metadataAddCmd = &cobra.Command{
 				fmt.Println("Metadata comment already exists. Use --force to replace.")
 				return
 			}
-			if err := deleteComment(comments[0].ID); err != nil {
+			if err := b.DeleteComment(ctx, comments[0].ID); err != nil {
 				fmt.Fprintf(os.Stderr, "Error deleting existing metadata comment: %v\n", err)
 				os.Exit(1)
 			}
-			if err := addComment(metadataAddIssue, metadataBody); err != nil {
+			if err := b.AddComment(ctx, metadataAddIssue, metadataBody); err != nil {
 				fmt.Fprintf(os.Stderr, "Error adding metadata comment: %v\n", err)
 				os.Exit(1)
 			}

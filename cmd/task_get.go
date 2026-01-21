@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
@@ -28,7 +29,8 @@ var taskGetCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		comments, err := getComments(taskGetIssue)
+		ctx := context.Background()
+		comments, err := GetBackend().GetComments(ctx, taskGetIssue)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error fetching comments: %v\n", err)
 			os.Exit(1)
@@ -51,7 +53,6 @@ var taskGetCmd = &cobra.Command{
 				continue
 			}
 
-			// Found the task, print its details
 			printTaskDetails(c.Body)
 			return
 		}
@@ -62,7 +63,6 @@ var taskGetCmd = &cobra.Command{
 }
 
 func printTaskDetails(body string) {
-	// Determine status
 	status := "UNDONE"
 	if strings.HasPrefix(body, "[DONE]") {
 		status = "DONE"
@@ -82,7 +82,6 @@ func printTaskDetails(body string) {
 
 	fmt.Printf("status: %s\n", status)
 
-	// Print fields in a logical order
 	fields := []string{"id", "model", "goal", "comments", "references", "unit-tests", "e2e-tests", "work_done", "commit"}
 	for _, field := range fields {
 		pattern := patterns[field]

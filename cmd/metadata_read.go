@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -19,7 +20,8 @@ var metadataReadCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		comments, err := getComments(metadataReadIssue)
+		ctx := context.Background()
+		comments, err := GetBackend().GetComments(ctx, metadataReadIssue)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error fetching comments: %v\n", err)
 			os.Exit(1)
